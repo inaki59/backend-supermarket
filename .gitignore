@@ -1,0 +1,32 @@
+# Node.js
+node_modules/
+
+# Logs
+logs
+*.log
+*.log.*
+
+# Archivos de dependencias de Node
+package-lock.json
+
+# Directorios de entorno de desarrollo
+.env
+.env.* 
+
+# Directorio de caché
+.cache/
+
+# Archivos generados por IDEs
+.vscode/
+.idea/
+
+# Archivos de OS
+.DS_Store
+Thumbs.db
+
+# Archivos generados por pruebas
+coverage/
+
+# Directorios de builds
+dist/
+build/
