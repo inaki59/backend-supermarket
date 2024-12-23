@@ -22,7 +22,7 @@ export const createPurchaseHistory = async (req: Request, res: Response) => {
 };
 
 // Obtener todos los historiales
-export const getAllPurchaseHistories = async (_req: Request, res: Response) => {
+export const getAllPurchaseHistories = async (req: Request, res: Response) => {
   try {
     const histories = await PurchaseHistoryModel.find();
     res.status(200).json(histories);
