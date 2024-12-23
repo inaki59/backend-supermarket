@@ -3,7 +3,6 @@ import 'dotenv/config';
 
 const connectDB = async (): Promise<void> => {
   try {
-    console.log('MONGO_URI:', process.env.MONGO_URI);
     const dbUri: string = process.env.MONGO_URI || 'mongodb://localhost:27017/mi_base_de_datos';
 
     // Conexión a la base de datos

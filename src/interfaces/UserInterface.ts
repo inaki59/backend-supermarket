@@ -3,6 +3,7 @@ export interface UserInterface {
     auth0Id: string;
     email?: string;
     edad:number;
+    actividad:string;
     createdAt: Date;
     updatedAt: Date;
     role?: string;      

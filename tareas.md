@@ -18,7 +18,9 @@
 - [ ] Crear middleware de autenticación.
 - [ ] Proteger rutas específicas.
 
-### 5. **Pruebas (Testing)**
+### 5.1 **Optimazación de endpoints**
+- [ ] hacer paginación y endpoint con poca duración 
+### 5.2 **Pruebas (Testing)**
 - [ ] Configurar Jest para pruebas.
 - [ ] Crear pruebas básicas para rutas y controladores.
 
