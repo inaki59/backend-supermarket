@@ -26,18 +26,42 @@ export const getShoppingLists = async (req: Request, res: Response) => {
 };
 
 // Obtener una lista de la compra por su ID
-export const getShoppingListById = async (req: Request, res: Response):Promise<any> => {
+export const getShoppingListById = async (req: Request, res: Response) => {
   try {
-    const shoppingList = await ShoppingListModel.findById(req.params.id);
+    const shoppingList = await ShoppingListModel.findById(req.params.id)
+      .populate({
+        path: 'userIds',
+        select: 'name',
+      })
+      .populate({
+        path: 'productIds',
+        select: 'name category',
+      });
+
     if (!shoppingList) {
-      return res.status(404).json({ message: 'Lista de compra no encontrada' });
+      return res.status(404).json({ message: 'Lista de la compra no encontrada' });
     }
-    res.status(200).json(shoppingList);
+
+    const response = {
+      name: shoppingList.name,
+      createdAt: shoppingList.createdAt,
+      updatedAt: shoppingList.updatedAt,
+      users: shoppingList.userIds.map((user: any) => ({
+        name: user.name,
+      })),
+      products: shoppingList.productIds.map((product: any) => ({
+        name: product.name,
+        category: product.category,
+      })),
+    };
+
+    res.status(200).json(response);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error al obtener la lista de compra' });
+    res.status(500).json({ message: 'Error al obtener la lista de la compra' });
   }
 };
+
 
 // Actualizar una lista de la compra por su ID
 export const updateShoppingList = async (req: Request, res: Response):Promise<any> => {

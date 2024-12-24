@@ -13,16 +13,41 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
-// Obtener todos los productos
+
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await ProductModel.find();
-    res.status(200).json(products);
+    // Obtén los parámetros de query
+    const { page = 1, limit = 10, category } = req.query;
+
+    // Construye el filtro dinámico
+    const filter: any = {};
+    if (category) {
+      filter.category = category; // Filtra por categoría si está presente
+    }
+
+    // Calcula el índice de inicio para la paginación
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // Obtén los productos con filtro y paginación
+    const products = await ProductModel.find(filter).skip(skip).limit(Number(limit));
+
+    // Cuenta el total de productos que coinciden con el filtro
+    const totalProducts = await ProductModel.countDocuments(filter);
+
+    // Responde con los datos filtrados y paginados
+    res.status(200).json({
+      total: totalProducts,
+      currentPage: Number(page),
+      totalPages: Math.ceil(totalProducts / Number(limit)),
+      products,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error al obtener los productos' });
   }
 };
+
+
 
 // Obtener un producto por su ID
 export const getProductById = async (req: Request, res: Response):Promise<any> => {

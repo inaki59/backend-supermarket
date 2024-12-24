@@ -4,7 +4,7 @@ export const createUser = async (req: any, res: any): Promise<any> => {
   try {
     const user = new UserModel(req.body);
     await user.save();
-    return res.status(201).json("usuario creado correctamente");  
+    return res.status(201).json({message:"usuario creado correctamente"});  
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error al crear el usuario' });

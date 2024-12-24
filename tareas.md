@@ -11,8 +11,9 @@
 #### tiempo requerido 30 minutos 
 
 ### 3. **Autenticación (Auth0 o JWT)**
-- [ ] Implementar autenticación con JWT.
+- [x] Implementar autenticación con JWT.
 - [ ] Configurar Auth0 como alternativa (opcional).
+#### implmentar jwt 1 hora aprox
 
 ### 4. **Rutas Protegidas**
 - [ ] Crear middleware de autenticación.
