@@ -6,6 +6,7 @@ export interface UserInterface {
     actividad:string;
     createdAt: Date;
     updatedAt: Date;
+    password: string;
     role?: string;      
     lastLogin?: Date;  
     status?: boolean;   
