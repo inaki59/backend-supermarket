@@ -7,7 +7,7 @@ interface UserDocument extends UserInterface, Document {}
 // Definimos el esquema con los nuevos campos
 const userSchema = new Schema<UserDocument>({
   name: { type: String, required: true },
-  auth0Id: { type: String, required: false, unique: true },  // ID único de Auth0
+  auth0Id: { type: String, required: true, unique: true }, 
   edad: { type: Number, required: false,validate:{validator:Number.isInteger,message:"no es un número entero valido"} },
   email: { type: String, required: false },
   actividad:{type:String,required:true},

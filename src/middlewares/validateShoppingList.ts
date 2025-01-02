@@ -2,10 +2,10 @@
 import { Request, Response, NextFunction } from 'express';
 
 export const validateShoppingList = (req: Request, res: Response, next: NextFunction):any => {
-  const { userIds, productIds, name } = req.body;
+  const {   name } = req.body;
 
-  if (!userIds || !productIds || !Array.isArray(productIds) || productIds.length === 0 || !name) {
-    return res.status(400).json({ message: 'Faltan campos requeridos o el formato es incorrecto' });
+  if (   !name) {
+    return res.status(400).json({ message: 'Faltan campo nombre' });
   }
 
   next();

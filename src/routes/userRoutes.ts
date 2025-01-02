@@ -2,7 +2,7 @@
 import express from 'express';
 import { createUser, getUsers, getUserById, updateUser, deleteUser,loginUser, logoutUser } from '../controllers/createUser';
 import { validateUser } from '../middlewares/ValidateUser';
-import { verifyToken } from '../middlewares/validatejwt'
+import { verifyToken } from '../middlewares/verifyToken'
 export const routerUsers = express.Router();
 
 // Rutas para usuarios

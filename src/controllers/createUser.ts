@@ -8,10 +8,10 @@ const invalidatedTokens: Set<string> = new Set();
 export const createUser = async (req: Request, res: Response): Promise<any> => {
   try {
     // Verificamos si la contraseña está presente en el cuerpo de la solicitud
-    const { name, email, password, edad, actividad, role } = req.body;
+    const { name, email, password, edad, actividad, role ,auth0Id} = req.body;
 
-    if (!password) {
-      return res.status(400).json({ message: 'La contraseña es requerida' });
+    if (!password || !auth0Id || !email) {
+      return res.status(400).json({ message: 'La contraseña, auth0Id, email es requerida' });
     }
 
     // Encriptar la contraseña antes de guardarla
@@ -22,12 +22,18 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
     const user = new UserModel({
       name,
       email,
+      auth0Id,
       password: hashedPassword,
       edad,
       actividad,
       role,
     });
-
+    // evita duplicados
+    const existemail=await UserModel.findOne({ email });
+    const existAuth=await UserModel.findOne({ auth0Id });
+    if (existAuth || existemail) {
+      return res.status(404).json({ message: 'mail o auth ya creados' });
+    }
     await user.save();
     return res.status(201).json({ message: 'Usuario creado correctamente' });
   } catch (error) {

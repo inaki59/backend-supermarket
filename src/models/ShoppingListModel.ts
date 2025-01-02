@@ -6,8 +6,9 @@ interface ShoppingListDocument extends ShoppingListInterface, Document {}
 
 const shoppingListSchema = new Schema<ShoppingListDocument>({
   name: { type: String, required: true },
+  code: { type: String, unique: true, required: true },
   userIds: [{ type: Types.ObjectId, ref: 'User', required: true }],  
-  productIds: [{ type: Types.ObjectId, ref: 'Product', required: true }],
+  productIds: [{ type: Types.ObjectId, ref: 'Product', required: false }],
 }, {
   timestamps: true, 
 });
