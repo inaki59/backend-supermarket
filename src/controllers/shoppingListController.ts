@@ -3,12 +3,13 @@ import { Request, Response } from 'express';
 import ShoppingListModel from '../models/ShoppingListModel';
 import jwt from 'jsonwebtoken';
 import { generateCodelist } from '../utils/generateCodeList';
+import ProductModel from '../models/ProductModel';
 const secretKey = 'tu_clave_secreta';
 
 interface JwtPayload {
   username: string;
 }
-// Crear una nueva lista de la compra
+
 export const createShoppingList = async (req: Request, res: Response):Promise<any> => {
   try {
     const header = req.header("Authorization") || "";
@@ -33,33 +34,19 @@ return res.status(201).json(shoppingList);  // Retorna la lista de compras cread
 };
 
 export const joinShoppingList = async (req: Request, res: Response): Promise<any> => {
-  const { code } = req.body;  // El código de la lista que se pasa en el body
-
-  if (!code) {
-    return res.status(400).json({ message: 'Se requiere el código de la lista' });
-  }
+  const { code } = req.body;  
 
   try {
-    // Verificamos que el token esté presente en los encabezados
-    const token = req.header('Authorization')?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: 'Token no proporcionado' });
-    }
-
-    // Verificamos el token y extraemos el ID del usuario
+    const header = req.header("Authorization") || "";
+    const token = header
     const decoded = jwt.verify(token, 'tu_clave_secreta') as { id: string };
     const userId = decoded.id;
 
     // Buscamos la lista de compras por el código
     const shoppingList = await ShoppingListModel.findOne({ code });
-    if (!shoppingList) {
-      return res.status(404).json({ message: 'Lista de compras no encontrada o código inválido' });
-    }
-    if (shoppingList.userIds.includes(userId)) {
-      return res.status(400).json({ message: 'El usuario ya está en esta lista' });
-    }
-    shoppingList.userIds.push(userId);
-    await shoppingList.save();
+   
+    shoppingList!.userIds.push(userId);
+    await shoppingList!.save();
 
     return res.status(200).json({ message: 'Usuario agregado exitosamente a la lista', shoppingList });
   } catch (error) {
@@ -67,6 +54,109 @@ export const joinShoppingList = async (req: Request, res: Response): Promise<any
     return res.status(500).json({ message: 'Error al unirse a la lista de compras' });
   }
 };
+
+
+
+export const addProductsToShoppingList = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { productIds } = req.body;
+     let shoppingListId:string = req.params.id;  
+      console.log("parametros ",req.params)
+
+    console.log("id a buscar ",shoppingListId )
+    const shoppingList = await ShoppingListModel.findById(shoppingListId);
+
+    if (!shoppingList) {
+      return res.status(404).json({ message: 'Lista de compras no encontrada.' });
+    }
+
+    // Buscamos los productos en la base de datos
+    const products = await ProductModel.find({ '_id': { $in: productIds } });
+
+    // Extraemos los ids de los productos encontrados
+    const foundProductIds = products.map(product => product.id.toString());
+
+    // Agregamos los ids de los productos a la lista de compras, evitando duplicados
+    const updatedProductIds = [...new Set([...shoppingList.productIds, ...foundProductIds])];
+
+    // Actualizamos la lista de compras con los nuevos ids de productos
+    shoppingList.productIds = updatedProductIds;
+
+    // Guardamos la lista de compras actualizada
+    await shoppingList.save();
+
+    return res.status(200).json({
+      message: 'Productos agregados exitosamente a la lista.',
+      updatedProductIds: shoppingList.productIds,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error al agregar productos a la lista de compras.' });
+  }
+};
+export const clearProductsFromShoppingList = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const shoppingListId: string = req.params.id;
+
+    console.log("ID de la lista a limpiar:", shoppingListId);
+
+    // Buscar la lista de compras
+    const shoppingList = await ShoppingListModel.findById(shoppingListId);
+
+    if (!shoppingList) {
+      return res.status(404).json({ message: 'Lista de compras no encontrada.' });
+    }
+
+    // Vaciar el array de productIds
+    shoppingList.productIds = [];
+
+    // Guardar la lista actualizada
+    await shoppingList.save();
+
+    return res.status(200).json({
+      message: 'Todos los productos han sido eliminados de la lista.',
+      updatedProductIds: shoppingList.productIds,
+    });
+  } catch (error) {
+    console.error('Error al vaciar los productos de la lista de compras:', error);
+    return res.status(500).json({ message: 'Error al vaciar los productos de la lista de compras.' });
+  }
+};
+export const removeProductFromShoppingList = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const shoppingListId: string = req.params.id;
+    const productId: string = req.body.productId; 
+
+    // Buscar la lista de compras
+    const shoppingList = await ShoppingListModel.findById(shoppingListId);
+
+    if (!shoppingList) {
+      return res.status(404).json({ message: 'Lista de compras no encontrada.' });
+    }
+
+    // Verificar si el productId existe en la lista
+    const productExists = shoppingList.productIds.some(id => id.toString() === productId);
+
+    if (!productExists) {
+      return res.status(400).json({ message: 'El producto no existe en la lista.' });
+    }
+
+    // Eliminar el productId del array
+    shoppingList.productIds = shoppingList.productIds.filter(id => id.toString() !== productId);
+
+    // Guardar la lista actualizada
+    await shoppingList.save();
+
+    return res.status(200).json({
+      message: 'Producto eliminado exitosamente de la lista.',
+      updatedProductIds: shoppingList.productIds,
+    });
+  } catch (error) {
+    console.error('Error al eliminar el producto de la lista de compras:', error);
+    return res.status(500).json({ message: 'Error al eliminar el producto de la lista de compras.' });
+  }
+};
+
 
 // Obtener todas las listas de la compra
 export const getShoppingLists = async (req: Request, res: Response) => {
