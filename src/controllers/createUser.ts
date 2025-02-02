@@ -7,40 +7,45 @@ const invalidatedTokens: Set<string> = new Set();
 // Crear un usuario
 export const createUser = async (req: Request, res: Response): Promise<any> => {
   try {
-    // Verificamos si la contraseña está presente en el cuerpo de la solicitud
-    const { name, email, password, edad, actividad, role ,auth0Id} = req.body;
+    const { name, email, password, edad, actividad, role, authProvider } = req.body;
 
-    if (!password || !auth0Id || !email) {
-      return res.status(400).json({ message: 'La contraseña, auth0Id, email es requerida' });
+    // Validar que los campos esenciales estén presentes
+    if (!email || !authProvider) {
+      return res.status(400).json({ message: 'El email y el tipo de autenticación (authProvider) son obligatorios.' });
     }
 
-    // Encriptar la contraseña antes de guardarla
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Para usuarios locales, la contraseña es obligatoria
+    let hashedPassword: string | undefined = undefined;
+    if (authProvider === 'local') {
+      if (!password) {
+        return res.status(400).json({ message: 'La contraseña es obligatoria para usuarios normales.' });
+      }
 
-    // Crear el nuevo usuario con la contraseña encriptada
+      // Hashear la contraseña
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(password, salt);
+    }
+
+    // Crear el nuevo usuario
     const user = new UserModel({
       name,
       email,
-      auth0Id,
       password: hashedPassword,
       edad,
       actividad,
-      role,
+      role: role || 'user', 
+      authProvider,
     });
-    // evita duplicados
-    const existemail=await UserModel.findOne({ email });
-    const existAuth=await UserModel.findOne({ auth0Id });
-    if (existAuth || existemail) {
-      return res.status(404).json({ message: 'mail o auth ya creados' });
-    }
+
     await user.save();
-    return res.status(201).json({ message: 'Usuario creado correctamente' });
+
+    return res.status(201).json({ message: 'Usuario creado correctamente.', user });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Error al crear el usuario' });
+    return res.status(500).json({ message: 'Error al crear el usuario.' });
   }
 };
+
 
 // Login de usuario
 export const loginUser = async (req: Request, res: Response): Promise<any> => {
@@ -59,11 +64,10 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ message: 'Contraseña incorrecta' });
     }
 
-    // Crear un JWT (Json Web Token) para el usuario
     const token = jwt.sign(
       { id: user._id, email: user.email },
-      'tu_clave_secreta',  // Aquí va tu clave secreta
-      { expiresIn: '1h' }  // Opcional, establece un tiempo de expiración para el token
+      'tu_clave_secreta', 
+      { expiresIn: '8h' }  
     );
 
     return res.status(200).json({ message: 'Login exitoso', token });
@@ -113,7 +117,7 @@ export const logoutUser = async (req: Request, res: Response): Promise<any> => {
 // Obtener un usuario por su ID
 export const getUserById = async (req: Request, res: Response): Promise<any> => {
   try {
-    const user = await UserModel.findById(req.params.id);
+    const user = await UserModel.findById(req.params.id).select('-_id -actividad -password');
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }

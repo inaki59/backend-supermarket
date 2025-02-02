@@ -16,12 +16,7 @@ export const checkUserInShoppingList = async (req: Request, res: Response, next:
     if (!listId) {
       return res.status(400).json({ message: 'El ID de la lista es obligatorio.' });
     }
-   
-    // if (!productIds || !Array.isArray(productIds)) {
-    //   return res.status(400).json({ message: 'Se requiere un array de productIds.' });
-    // }
-  
-    console.log(listId)
+
     if (!mongoose.Types.ObjectId.isValid(listId)) {
         return res.status(400).json({ message: 'El ID de la lista de compras no es válido.' });
       }

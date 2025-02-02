@@ -1,13 +1,13 @@
 export interface UserInterface {
     name: string;
-    auth0Id: string;
     email?: string;
-    edad:number;
+    edad?:number;
     actividad:string;
     createdAt: Date;
     updatedAt: Date;
     password: string;
-    role?: string;      
+    role?: string;     
+    authProvider: 'local' | 'google'; 
     lastLogin?: Date;  
     status?: boolean;   
   }

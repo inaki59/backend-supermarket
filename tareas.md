@@ -16,8 +16,8 @@
 #### implmentar jwt 1 hora aprox
 
 ### 4. **Rutas Protegidas**
-- [ ] Crear middleware de autenticación.
-- [ ] Proteger rutas específicas.
+- [X] Crear middleware de autenticación.
+- [x] Proteger rutas específicas.
 
 ### 5.1 **Optimazación de endpoints**
 - [ ] hacer paginación y endpoint con poca tiempo de respuesta 

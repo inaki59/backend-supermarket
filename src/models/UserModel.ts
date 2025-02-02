@@ -7,14 +7,14 @@ interface UserDocument extends UserInterface, Document {}
 // Definimos el esquema con los nuevos campos
 const userSchema = new Schema<UserDocument>({
   name: { type: String, required: true },
-  auth0Id: { type: String, required: true, unique: true }, 
   edad: { type: Number, required: false,validate:{validator:Number.isInteger,message:"no es un número entero valido"} },
   email: { type: String, required: false },
   actividad:{type:String,required:true},
-  role: { type: String, enum: ['admin', 'user', 'moderator'], default: 'user' }, // Rol del usuario
-  status: { type: Boolean, default: true },  // Estado del usuario (activo por defecto)
+  role: { type: String, enum: ['admin', 'user', 'moderator'], default: 'user' },
+  authProvider: { type: String, required: true, enum: ['local', 'google'] },
+  status: { type: Boolean, default: true }, 
   lastLogin: { type: Date, required: false },  
-  password: { type: String, required: true } 
+  password: { type: String, required: false } 
 }, {
   timestamps: true,  // Automáticamente crea createdAt y updatedAt
 });

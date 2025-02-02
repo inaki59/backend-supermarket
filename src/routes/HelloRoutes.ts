@@ -5,7 +5,7 @@ const secretKey = 'tu_clave_secreta';
 export const helloRoutes = Router();
 
 
-helloRoutes.get("/hello",verifyToken ,async (req: Request, res: Response) => {
+helloRoutes.get("/hello" ,async (req: Request, res: Response) => {
     res.status(200).json({ message: "tiene acceso enhorabuena" });
 });
 

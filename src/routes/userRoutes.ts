@@ -3,15 +3,21 @@ import express from 'express';
 import { createUser, getUsers, getUserById, updateUser, deleteUser,loginUser, logoutUser } from '../controllers/createUser';
 import { validateUser } from '../middlewares/ValidateUser';
 import { verifyToken } from '../middlewares/verifyToken'
+import { homeController, profileController } from '../controllers/userAuth';
+import { checkEmailExists } from '../middlewares/validateEmailExist';
 export const routerUsers = express.Router();
 
 // Rutas para usuarios
-routerUsers.post('/',validateUser, createUser);  
+routerUsers.post('/',[validateUser,checkEmailExists], createUser);  
 routerUsers.post("/logout/:id", logoutUser);
-routerUsers.get('/', validateUser,getUsers);
-routerUsers.get("/login",loginUser);
+// routerUsers.get('/', validateUser,getUsers);
+routerUsers.post("/login",loginUser);
 routerUsers.get('/:id',verifyToken, getUserById); 
 routerUsers.put('/:id',verifyToken, updateUser);  
 routerUsers.delete('/:id',verifyToken, deleteUser); 
+// rutas para el auth=
+routerUsers.get('/', homeController); 
+routerUsers.get('/profile', profileController); 
+
 
 
