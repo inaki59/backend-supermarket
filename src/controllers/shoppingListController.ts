@@ -159,9 +159,13 @@ export const removeProductFromShoppingList = async (req: Request, res: Response)
 
 
 // Obtener todas las listas de la compra
-export const getShoppingLists = async (req: Request, res: Response) => {
+export const getShoppingLists = async (req: Request, res: Response):Promise<any> => {
   try {
-    const shoppingLists = await ShoppingListModel.find();
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Se requiere un userId' });
+    }
+    const shoppingLists = await ShoppingListModel.find({ userIds: id });
     res.status(200).json(shoppingLists);
   } catch (error) {
     console.error(error);
