@@ -14,8 +14,8 @@ routerList.post('/group',[verifyToken,validateCode,checkgroupAccess],joinShoppin
 routerList.post("/add-product/:id",[verifyToken,checkUserInShoppingList,validateProduct],addProductsToShoppingList);                   
 routerList.get('/', getShoppingLists);                           
 routerList.get('/:id', getShoppingLists);
-routerList.put('/:id', validateShoppingList, updateShoppingList); 
-routerList.delete('/:id', deleteShoppingList); 
+routerList.put('/:id', [verifyToken,validateShoppingList], updateShoppingList); 
+routerList.delete('/:id',verifyToken, deleteShoppingList); 
 routerList.delete('/clear-products/:id',[verifyToken,checkUserInShoppingList], clearProductsFromShoppingList);
 routerList.delete('/remove-product/:id',[verifyToken,checkUserInShoppingList], removeProductFromShoppingList);                 
 
