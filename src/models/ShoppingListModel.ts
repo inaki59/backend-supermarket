@@ -8,7 +8,14 @@ const shoppingListSchema = new Schema<ShoppingListDocument>({
   name: { type: String, required: true },
   code: { type: String, unique: true, required: true },
   userIds: [{ type: Types.ObjectId, ref: 'User', required: true }],  
-  productIds: [{ type: Types.ObjectId, ref: 'Product', required: false }],
+  products: [
+    {
+      productId: { type: Types.ObjectId, ref: 'Product', required: true },
+      note: { type: String, required: false }, // Permite agregar observaciones
+    }
+  ],
+
+
 }, {
   timestamps: true, 
 });

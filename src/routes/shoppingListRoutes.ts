@@ -3,7 +3,8 @@ import { Router } from 'express';
 import { createShoppingList, updateShoppingList, deleteShoppingList
 ,joinShoppingList, addProductsToShoppingList, clearProductsFromShoppingList, removeProductFromShoppingList, 
 getShoppingLists} from '../controllers';
-import { checkgroupAccess, checkUserInShoppingList, validateCode, validateShoppingList,verifyToken,validateProduct } from '../middlewares';
+import { checkgroupAccess, checkUserInShoppingList, validateCode, validateShoppingList,verifyToken,validateProduct,validateShoppingListProducts } from '../middlewares';
+
 
 
 export const routerList = Router();
@@ -11,7 +12,7 @@ export const routerList = Router();
 // Rutas para listas de compra
 routerList.post('/', [verifyToken,validateShoppingList], createShoppingList);  
 routerList.post('/group',[verifyToken,validateCode,checkgroupAccess],joinShoppingList);
-routerList.post("/add-product/:id",[verifyToken,checkUserInShoppingList,validateProduct],addProductsToShoppingList);                   
+routerList.post("/add-product/:id",[verifyToken,checkUserInShoppingList,validateShoppingListProducts],addProductsToShoppingList);                   
 routerList.get('/', getShoppingLists);                           
 routerList.get('/:id', getShoppingLists);
 routerList.put('/:id', [verifyToken,validateShoppingList], updateShoppingList); 

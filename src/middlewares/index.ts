@@ -7,3 +7,4 @@ export * from "./validateCode";
 export * from "./checkgroupAccess";
 export * from "./checkUserInShoppingList";
 export * from "./validateProductArray";
+export * from "./validateShoppinglistProducts"

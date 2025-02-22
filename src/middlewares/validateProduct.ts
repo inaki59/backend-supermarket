@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 
 export const validateProduct = (req: Request, res: Response, next: NextFunction):any => {
-  const { name, category, price, defaultQuantity } = req.body;
+  const { name, category, price, defaultQuantity,observacion } = req.body;
 
   // Validación de campos requeridos
   if (!name || typeof name !== 'string') {
     return res.status(400).json({ message: 'El campo "name" es obligatorio y debe ser un string.' });
   }
+
   if (!category || typeof category !== 'string') {
     return res.status(400).json({ message: 'El campo "category" es obligatorio y debe ser un string.' });
   }
