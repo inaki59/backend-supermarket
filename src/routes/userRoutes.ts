@@ -9,8 +9,7 @@ export const routerUsers = express.Router();
 
 // Rutas para usuarios
 routerUsers.post('/',[validateUser,checkEmailExists], createUser);  
-routerUsers.post("/logout/:id", logoutUser);
-// routerUsers.get('/', validateUser,getUsers);
+routerUsers.post("/logout/:id",verifyToken, logoutUser);
 routerUsers.post("/login",loginUser);
 routerUsers.get('/:id',verifyToken, getUserById); 
 routerUsers.put('/:id',verifyToken, updateUser);  
