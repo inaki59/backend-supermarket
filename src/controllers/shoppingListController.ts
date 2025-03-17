@@ -167,6 +167,7 @@ export const updateShoppingList = async (req: Request, res: Response):Promise<an
 export const getShoppingLists = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
+
     if (!id) {
       return res.status(400).json({ message: 'Se requiere un userId' });
     }

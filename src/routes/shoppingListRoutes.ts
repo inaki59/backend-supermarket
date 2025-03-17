@@ -2,7 +2,8 @@
 import { Router } from 'express';
 import { createShoppingList, updateShoppingList, deleteShoppingList
 ,joinShoppingList, addProductsToShoppingList, clearProductsFromShoppingList, removeProductFromShoppingList, 
-getShoppingLists} from '../controllers';
+getShoppingLists,
+getShoppingListById} from '../controllers';
 import { checkgroupAccess, checkUserInShoppingList, validateCode, validateShoppingList,verifyToken,validateProduct,validateShoppingListProducts } from '../middlewares';
 
 
@@ -13,8 +14,8 @@ export const routerList = Router();
 routerList.post('/', [verifyToken], createShoppingList);  
 routerList.post('/group',[verifyToken,validateCode,checkgroupAccess],joinShoppingList);
 routerList.post("/add-product/:id",[verifyToken,checkUserInShoppingList,validateShoppingListProducts],addProductsToShoppingList);                   
-routerList.get('/', getShoppingLists);                           
-routerList.get('/:id', getShoppingLists);
+routerList.get('/group/:id', getShoppingLists);                           
+routerList.get('/:id', getShoppingListById);// obtener una unica lista id de lista
 routerList.put('/:id', [verifyToken,validateShoppingList], updateShoppingList); 
 routerList.delete('/:id',verifyToken, deleteShoppingList); 
 routerList.delete('/clear-products/:id',[verifyToken,checkUserInShoppingList], clearProductsFromShoppingList);
