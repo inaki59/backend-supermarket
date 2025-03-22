@@ -19,6 +19,6 @@ routerList.get('/:id', getShoppingListById);// obtener una unica lista id de lis
 routerList.put('/:id', [verifyToken,validateShoppingList], updateShoppingList); 
 routerList.delete('/:id',verifyToken, deleteShoppingList); 
 routerList.delete('/clear-products/:id',[verifyToken,checkUserInShoppingList], clearProductsFromShoppingList);
-routerList.delete('/remove-product/:id',[verifyToken,checkUserInShoppingList], removeProductFromShoppingList);                 
+routerList.post('/remove-product/:id',[verifyToken,checkUserInShoppingList], removeProductFromShoppingList);                 
 
 

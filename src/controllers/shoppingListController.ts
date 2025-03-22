@@ -91,20 +91,31 @@ export const addProductsToShoppingList = async (req: Request, res: Response): Pr
 export const removeProductFromShoppingList = async (req: Request, res: Response): Promise<any> => {
   try {
     const shoppingListId = req.params.id;
-    const productId = req.body.productId;
+    const productIds = req.body.productIds; // Ahora esperamos un array de IDs
 
+    // Validar que productIds sea un array
+    if (!Array.isArray(productIds)) {
+      return res.status(400).json({ message: 'productIds debe ser un array' });
+    }
+
+    // Buscar la lista de compras
     const shoppingList = await ShoppingListModel.findById(shoppingListId);
     if (!shoppingList) {
       return res.status(404).json({ message: 'Lista de compras no encontrada' });
     }
 
-    shoppingList.products = shoppingList.products.filter(p => p.productId.toString() !== productId);
+    // Filtrar los productos que NO están en la lista de productIds
+    shoppingList.products = shoppingList.products.filter(
+      (p) => !productIds.includes(p.productId.toString())
+    );
+
+    // Guardar la lista actualizada
     await shoppingList.save();
 
-    return res.status(200).json({ message: 'Producto eliminado', updatedProducts: shoppingList.products });
+    return res.status(200).json({ message: 'Productos eliminados', updatedProducts: shoppingList.products });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Error al eliminar producto' });
+    return res.status(500).json({ message: 'Error al eliminar productos' });
   }
 };
 
