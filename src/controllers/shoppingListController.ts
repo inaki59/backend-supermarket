@@ -124,6 +124,7 @@ export const getShoppingListById = async (req: Request, res: Response): Promise<
       updatedAt: shoppingList.updatedAt,
       users: shoppingList.userIds.map((user: any) => ({ name: user.name })),
       products: shoppingList.products.map((p: any) => ({
+        _id: p.productId._id,
         name: p.productId.name,
         category: p.productId.category,
         note: p.note,
