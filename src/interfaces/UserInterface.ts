@@ -6,6 +6,7 @@ export interface UserInterface {
     createdAt: Date;
     updatedAt: Date;
     password: string;
+    recoveryCode:string;
     role?: string;     
     authProvider: 'local' | 'google'; 
     lastLogin?: Date;  

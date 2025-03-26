@@ -14,7 +14,8 @@ const userSchema = new Schema<UserDocument>({
   authProvider: { type: String, required: true, enum: ['local', 'google'] },
   status: { type: Boolean, default: true }, 
   lastLogin: { type: Date, required: false },  
-  password: { type: String, required: false } 
+  password: { type: String, required: false } ,
+  recoveryCode:{type:String,required:true}
 }, {
   timestamps: true,  // Automáticamente crea createdAt y updatedAt
 });

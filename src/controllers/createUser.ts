@@ -5,46 +5,76 @@ import jwt from 'jsonwebtoken';
 
 const invalidatedTokens: Set<string> = new Set();
 // Crear un usuario
+const generateRecoveryCode = (): string => {
+  const numbers: string = Math.floor(1000 + Math.random() * 9000).toString(); 
+  const letters: string = Math.random().toString(36).substring(2, 5).toUpperCase();
+  return `${numbers}${letters}`; 
+};
+
+
 export const createUser = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, email, password, edad, actividad, role, authProvider } = req.body;
 
-    // Validar que los campos esenciales estén presentes
     if (!email || !authProvider) {
-      return res.status(400).json({ message: 'El email y el tipo de autenticación (authProvider) son obligatorios.' });
+      return res.status(400).json({ message: "El email y el tipo de autenticación son obligatorios." });
     }
 
-    // Para usuarios locales, la contraseña es obligatoria
     let hashedPassword: string | undefined = undefined;
-    if (authProvider === 'local') {
+    if (authProvider === "local") {
       if (!password) {
-        return res.status(400).json({ message: 'La contraseña es obligatoria para usuarios normales.' });
+        return res.status(400).json({ message: "La contraseña es obligatoria." });
       }
-
-      // Hashear la contraseña
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(password, salt);
     }
 
-    // Crear el nuevo usuario
+    // Generar matrícula de recuperación
+    const recoveryCode = generateRecoveryCode();
+
     const user = new UserModel({
       name,
       email,
       password: hashedPassword,
       edad,
       actividad,
-      role: role || 'user', 
+      role: role || "user",
       authProvider,
+      recoveryCode, 
     });
 
     await user.save();
 
-    return res.status(201).json({ message: 'Usuario creado correctamente.', user });
+    return res.status(201).json({ message: "Usuario creado correctamente.", recoveryCode });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Error al crear el usuario.' });
+    return res.status(500).json({ message: "Error al crear el usuario." });
   }
 };
+export const resetPassword= async (req: Request, res: Response):Promise<any> => {
+  try {
+    const { email, recoveryCode, newPassword } = req.body;
+
+    // Buscar usuario por email
+    const user = await UserModel.findOne({ email });
+
+    if (!user || user.recoveryCode !== recoveryCode) {
+      return res.status(400).json({ message: "Correo o código de recuperación incorrecto." });
+    }
+
+    // Encriptar la nueva contraseña
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    // Guardar los cambios en la BD
+    await user.save();
+
+    return res.json({ message: "Contraseña cambiada correctamente." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error al resetear la contraseña." });
+  }
+}
 
 
 // Login de usuario
