@@ -66,41 +66,37 @@ export const uploadProductsCSV = async (req: Request, res: Response):Promise<any
 export const getProducts = async (req: Request, res: Response) => {
   try {
     // Obtén los parámetros de query
-    const { page = 1, limit = 10, category, name } = req.query;
+    const { skip = 0, limit = 10, category, name } = req.query; // Cambiamos page por skip
 
-    // Construye el filtro dinámico
+    // Construye el filtro (igual que antes)
     const filter: any = {};
-
-    // Filtro por categoría
+    
     if (category) {
       if (Array.isArray(category)) {
-        filter.category = { $in: category }; // Si 'category' es un array
+        filter.category = { $in: category };
       } else if (typeof category === 'string' && category.includes(',')) {
-        filter.category = { $in: category.split(',') }; // Si es una cadena separada por comas
+        filter.category = { $in: category.split(',') };
       } else {
-        filter.category = category; // Si es una sola categoría
+        filter.category = category;
       }
     }
 
-    // Filtro por nombre (si se pasa un nombre en la query)
     if (name) {
-      filter.name = { $regex: name, $options: 'i' }; // 'i' es para hacerlo case-insensitive
+      filter.name = { $regex: name, $options: 'i' };
     }
 
-    // Calcula el índice de inicio para la paginación
-    const skip = (Number(page) - 1) * Number(limit);
-
     // Obtén los productos con filtro y paginación
-    const products = await ProductModel.find(filter).skip(skip).limit(Number(limit));
+    const products = await ProductModel.find(filter)
+      .skip(Number(skip))
+      .limit(Number(limit));
 
-    // Cuenta el total de productos que coinciden con el filtro
+    // Cuenta el total de productos (opcional para scroll infinito)
     const totalProducts = await ProductModel.countDocuments(filter);
 
-    // Responde con los datos filtrados y paginados
     res.status(200).json({
       total: totalProducts,
-      currentPage: Number(page),
-      totalPages: Math.ceil(totalProducts / Number(limit)),
+      skip: Number(skip),
+      limit: Number(limit),
       products,
     });
   } catch (error) {
@@ -108,7 +104,6 @@ export const getProducts = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error al obtener los productos' });
   }
 };
-
 
 
 
