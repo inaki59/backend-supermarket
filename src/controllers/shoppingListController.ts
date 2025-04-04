@@ -4,6 +4,7 @@ import ShoppingListModel from '../models/ShoppingListModel';
 import jwt from 'jsonwebtoken';
 import { generateCodelist } from '../utils/generateCodeList';
 import ProductModel from '../models/ProductModel';
+import { PurchaseHistoryModel } from '../models/PurcharseHostoryDocument';
 const secretKey = 'tu_clave_secreta';
 
 interface JwtPayload {
@@ -175,6 +176,33 @@ export const updateShoppingList = async (req: Request, res: Response):Promise<an
     res.status(500).json({ message: 'Error al actualizar la lista de compra' });
   }
 };
+export const updateProductInShoppingList = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { listId, productId } = req.params;
+    const updatedProductData = req.body;
+
+    const shoppingList = await ShoppingListModel.findOneAndUpdate(
+      { _id: listId, "products.productId": productId },
+      {
+        $set: {
+          "products.$.note": updatedProductData.note,
+          // Aquí puedes añadir más campos si los quieres actualizar
+        }
+      },
+      { new: true }
+    );
+
+    if (!shoppingList) {
+      return res.status(404).json({ message: 'Producto o lista no encontrada' });
+    }
+
+    res.status(200).json(shoppingList);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar el producto en la lista de compra' });
+  }
+};
+
 // Obtener todas las listas de la compra
 export const getShoppingLists = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -213,19 +241,86 @@ export const clearProductsFromShoppingList = async (req: Request, res: Response)
     if (!shoppingList) {
       return res.status(404).json({ message: 'Lista de compras no encontrada.' });
     }
+    // Crear registro en el historial de compras antes de limpiar
+    const purchaseHistoryEntry = new PurchaseHistoryModel({
+      listId: shoppingList._id,
+      listName: shoppingList.name,
+      users: shoppingList.userIds,
+      products: shoppingList.products.map(product => ({
+        productId: product.productId,
+        note: product.note || 'Sin nota' 
+      })),
+      purchasedAt: new Date()
+    });
 
-    // Vaciar el array de productIds
+    // Guardar el historial
+    await purchaseHistoryEntry.save();
+
+    // Vaciar el array de productos
     shoppingList.products = [];
 
     // Guardar la lista actualizada
     await shoppingList.save();
 
     return res.status(200).json({
-      message: 'Todos los productos han sido eliminados de la lista.',
+      message: 'Todos los productos han sido eliminados de la lista y guardados en el historial.',
       updatedProductIds: shoppingList.products,
+      purchaseHistoryId: purchaseHistoryEntry._id
     });
   } catch (error) {
     console.error('Error al vaciar los productos de la lista de compras:', error);
-    return res.status(500).json({ message: 'Error al vaciar los productos de la lista de compras.' });
+    return res.status(500).json({ 
+      message: 'Error al vaciar los productos de la lista de compras.',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
+export const getMobilePurchaseHistory = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const listId = req.params.listId;
+
+    // Validación rápida de ID
+
+
+    // Consulta optimizada para móvil
+    const histories = await PurchaseHistoryModel.find({ listId })
+    .select('_id purchasedAt products.productId products.note') // Proyección estilo Mongoose
+    .populate({
+      path: 'products.productId',
+      select: 'name',
+      model: 'Product' // Asegúrate que coincida con tu modelo
+    })
+    .sort({ purchasedAt: -1 })
+    .limit(50)
+    .lean(); // lean() siempre al final
+  
+  if (!histories.length) {
+    return res.status(200).json({ 
+      success: true,
+      data: [],
+      message: 'NO_HISTORIAL'
+    });
+  }
+  
+
+    // Respuesta minimalista
+    return res.status(200).json({
+      success: true,
+      data: histories.map(h => ({
+        id: h._id,
+        date: h.purchasedAt,
+        products: h.products.map(p => ({
+          id: p.productId,
+          note: p.note || "NA"
+        }))
+      }))
+    });
+
+  } catch (error) {
+    console.error('Error móvil:', error);
+    return res.status(500).json({ 
+      success: false,
+      error: 'ERROR_SERVIDOR'
+    });
   }
 };

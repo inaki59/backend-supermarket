@@ -3,7 +3,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 // Definimos una subestructura para los productos en el historial
 interface ProductEntry {
   productId: string;
-  quantity: number;
+  note: string;
 }
 
 // Extendemos Document para incluir los campos del historial
@@ -18,7 +18,7 @@ interface PurchaseHistoryDocument extends Document {
 // Creamos un esquema para los productos dentro del historial
 const ProductEntrySchema = new Schema<ProductEntry>({
   productId: { type: String, required: true },
-  quantity: { type: Number, required: true, min: 1 },
+  note: { type: String, required: true, min: 1 },
 });
 
 // Creamos el esquema para el historial de compras

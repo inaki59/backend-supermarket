@@ -3,7 +3,8 @@ import { Router } from 'express';
 import { createShoppingList, updateShoppingList, deleteShoppingList
 ,joinShoppingList, addProductsToShoppingList, clearProductsFromShoppingList, removeProductFromShoppingList, 
 getShoppingLists,
-getShoppingListById} from '../controllers';
+getShoppingListById ,getMobilePurchaseHistory,
+updateProductInShoppingList} from '../controllers';
 import { checkgroupAccess, checkUserInShoppingList, validateCode, validateShoppingList,verifyToken,validateProduct,validateShoppingListProducts } from '../middlewares';
 
 
@@ -18,7 +19,9 @@ routerList.get('/group/:id', getShoppingLists);
 routerList.get('/:id', getShoppingListById);// obtener una unica lista id de lista
 routerList.put('/:id', [verifyToken,validateShoppingList], updateShoppingList); 
 routerList.delete('/:id',verifyToken, deleteShoppingList); 
-routerList.delete('/clear-products/:id',[verifyToken,checkUserInShoppingList], clearProductsFromShoppingList);
-routerList.post('/remove-product/:id',[verifyToken,checkUserInShoppingList], removeProductFromShoppingList);                 
+routerList.post('/clear-products/:id',[verifyToken,checkUserInShoppingList], clearProductsFromShoppingList);
+routerList.post('/remove-product/:id',[verifyToken,checkUserInShoppingList], removeProductFromShoppingList);           
+routerList.get('/history/:listId',[verifyToken], getMobilePurchaseHistory);    
+routerList.put('/shopping-lists/:listId/products/:productId',[verifyToken], updateProductInShoppingList);  
 
 
