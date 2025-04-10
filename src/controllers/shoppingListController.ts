@@ -36,6 +36,7 @@ export const joinShoppingList = async (req: Request, res: Response): Promise<any
     const token = req.header("Authorization") || "";
     const decoded = jwt.verify(token, secretKey) as JwtPayload;
     const userId = decoded.id;
+    console.log("user id ", userId)
     const { code } = req.body;
 
     const shoppingList = await ShoppingListModel.findOne({ code });
