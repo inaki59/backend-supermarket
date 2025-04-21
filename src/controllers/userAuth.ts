@@ -15,7 +15,7 @@ export const authMiddleware = auth(authConfig);
 
 // Controlador para la página principal
 export const homeController = (req: Request, res: Response): void => {
-    console.log(req.oidc.isAuthenticated())
+
   res.send(req.oidc?.isAuthenticated() ? 'Logged in' : 'Logged out');
 };
 

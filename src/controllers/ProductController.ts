@@ -15,7 +15,7 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 export const uploadProductsCSV = async (req: Request, res: Response):Promise<any> => {
-  console.log("llegamos hasta el controlador")
+  
   try {
     // Si se sube un archivo CSV
     if (req.file) {
