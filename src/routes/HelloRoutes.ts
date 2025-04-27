@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import jwt from 'jsonwebtoken';
 import { verifyToken } from "../middlewares";
-const secretKey = 'tu_clave_secreta'; 
+const secretKey =  process.env.SECRET_KEY as string;  
 export const helloRoutes = Router();
 
 

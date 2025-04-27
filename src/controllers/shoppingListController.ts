@@ -5,8 +5,8 @@ import jwt from 'jsonwebtoken';
 import { generateCodelist } from '../utils/generateCodeList';
 import ProductModel from '../models/ProductModel';
 import { PurchaseHistoryModel } from '../models/PurcharseHostoryDocument';
-const secretKey = 'tu_clave_secreta';
 
+const secretKey = process.env.SECRET_KEY as string; 
 interface JwtPayload {
   id: string;
 }

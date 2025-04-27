@@ -5,10 +5,15 @@ import jwt from 'jsonwebtoken';
 
 const invalidatedTokens: Set<string> = new Set();
 // Crear un usuario
+const secret = process.env.SECRET_KEY as string; 
 const generateRecoveryCode = (): string => {
-  const numbers: string = Math.floor(1000 + Math.random() * 9000).toString(); 
-  const letters: string = Math.random().toString(36).substring(2, 5).toUpperCase();
-  return `${numbers}${letters}`; 
+  const numbers: string = Math.floor(1000 + Math.random() * 9000).toString(); // 4 números asegurados
+
+  const letters = Array.from({ length: 3 }, () => 
+    String.fromCharCode(65 + Math.floor(Math.random() * 26)) // Genera una letra aleatoria (A-Z)
+  ).join('');
+
+  return `${numbers}${letters}`;
 };
 
 
@@ -96,7 +101,7 @@ export const loginUser = async (req: Request, res: Response): Promise<any> => {
 
     const token = jwt.sign(
       { id: user._id, email: user.email },
-      'tu_clave_secreta', 
+      secret, 
       { expiresIn: '8h' }  
     );
 
@@ -127,7 +132,7 @@ export const logoutUser = async (req: Request, res: Response): Promise<any> => {
 
     try {
       // Decodificar el token para obtener el userId
-      decoded = jwt.verify(token, 'tu_clave_secreta'); // Usa la misma clave secreta del login
+      decoded = jwt.verify(token,secret); // Usa la misma clave secreta del login
     } catch (error) {
       return res.status(401).json({ message: 'Token inválido o expirado' });
     }

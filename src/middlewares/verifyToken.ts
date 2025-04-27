@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Tu clave secreta
-const secretKey = 'tu_clave_secreta';
+
+const secretKey =  process.env.SECRET_KEY as string; 
 
 interface JwtPayload {
   username: string;

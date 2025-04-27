@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import ShoppingListModel from '../models/ShoppingListModel';
 import jwt from 'jsonwebtoken';
-const secretKey = 'tu_clave_secreta';
+const secretKey =  process.env.SECRET_KEY as string; 
 export const checkgroupAccess =async (req: Request, res: Response, next: NextFunction) => {
     const { code } = req.body;
       const header = req.header("Authorization") || "";

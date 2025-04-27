@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import ShoppingListModel from '../models/ShoppingListModel';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-const secretKey = 'tu_clave_secreta';
+const secretKey =  process.env.SECRET_KEY as string; 
 export const checkUserInShoppingList = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { productIds } = req.body;
