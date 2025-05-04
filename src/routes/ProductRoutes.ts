@@ -7,10 +7,10 @@ import { createProduct, deleteProduct, getProductById, getProducts, updateProduc
 export const routerProduct = express.Router();
 
 // Rutas para productos con validación y controladores
-routerProduct.post('/', [validateProduct], createProduct);     
+// routerProduct.post('/', [validateProduct], createProduct);     
 routerProduct.get('/', getProducts);                          
 routerProduct.get('/:id', getProductById);                
-routerProduct.put('/:id', validateProduct, updateProduct);    
-routerProduct.delete('/:id', deleteProduct);               
+// routerProduct.put('/:id', validateProduct, updateProduct);    
+// routerProduct.delete('/:id', deleteProduct);               
 routerProduct.post('/upload-csv',fileSizeLimiter, uploadProductsCSV
 );
