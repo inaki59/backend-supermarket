@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["nodejs-18_x"]  # Usa Node.js 18
+
+[phases.build]
+commands = ["npm install"]
+
+[phases.start]
+command = "npm start"  # Asegúrate de que "start" en package.json apunte a tu entrypoint (ej: "src/index.ts")
