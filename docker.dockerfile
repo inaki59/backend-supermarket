@@ -3,5 +3,5 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build || exit 1  # Fuerza a fallar si el build no funciona
+RUN npm run build && ls -la dist/  # Verifica que se generen los archivos
 CMD ["npm", "start"]

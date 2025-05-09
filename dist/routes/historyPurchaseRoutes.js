@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.routerHistory = void 0;
+const express_1 = require("express");
+const controllers_1 = require("../controllers");
+const middlewares_1 = require("../middlewares");
+exports.routerHistory = (0, express_1.Router)();
+exports.routerHistory.post('/', middlewares_1.validatePurchaseHistory, controllers_1.createPurchaseHistory);
+exports.routerHistory.get('/', controllers_1.getAllPurchaseHistories);
+exports.routerHistory.get('/:id', controllers_1.getPurchaseHistoryById);
+exports.routerHistory.put('/:id', middlewares_1.validatePurchaseHistory, controllers_1.updatePurchaseHistory);
+exports.routerHistory.delete('/:id', controllers_1.deletePurchaseHistory);
