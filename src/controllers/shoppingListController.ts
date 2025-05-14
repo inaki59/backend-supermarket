@@ -158,6 +158,8 @@ export const deleteShoppingList = async (req: Request, res: Response):Promise<an
     if (!shoppingList) {
       return res.status(404).json({ message: 'Lista de compra no encontrada' });
     }
+
+    await PurchaseHistoryModel.deleteMany({ listId: req.params.id });
     res.status(200).json({ message: 'Lista de compra eliminada correctamente' });
   } catch (error) {
     console.error(error);
