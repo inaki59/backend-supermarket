@@ -4,7 +4,7 @@ import ShoppingListModel from '../models/ShoppingListModel';
 import jwt from 'jsonwebtoken';
 import { generateCodelist } from '../utils/generateCodeList';
 import ProductModel from '../models/ProductModel';
-import { PurchaseHistoryModel } from '../models/PurcharseHostoryDocument';
+import  PurchaseHistoryModel  from '../models/PurcharseHostoryDocument';
 import { Types } from 'mongoose';
 
 const secretKey = process.env.SECRET_KEY as string; 
@@ -155,23 +155,32 @@ export const getShoppingListById = async (req: Request, res: Response): Promise<
 // Eliminar una lista de la compra por su ID
 export const deleteShoppingList = async (req: Request, res: Response): Promise<any> => {
   try {
-    const foreignId = new Types.ObjectId(req.params.id); // Conversión clave
+    // 1. Convertir el ID del parámetro a un ObjectId.
+    // ESTO ES CORRECTO porque tanto el _id de ShoppingList como el listId esperado en PurchaseHistory son ObjectId.
+    const foreignId = new Types.ObjectId(req.params.id);
 
-    // 1. Eliminar lista
+    // 2. Eliminar la lista de compras por su ID (ObjectId).
     const shoppingList = await ShoppingListModel.findByIdAndDelete(foreignId);
+
+    // Si la lista no se encuentra, respondemos con 404
     if (!shoppingList) {
       return res.status(404).json({ message: 'Lista no encontrada' });
     }
 
-    // 2. Eliminar historiales (ahora comparando ObjectId con String)
-    await PurchaseHistoryModel.deleteMany({ 
-      listId: foreignId // Mantenemos como string para coincidir con el modelo
+    // 3. Eliminar todos los historiales de compra asociados a esta lista.
+    // Aquí buscamos documentos donde el campo 'listId' (que DEBE ser ObjectId según tu esquema)
+    // coincida con el 'foreignId' (que es el ObjectId de la lista eliminada).
+    await PurchaseHistoryModel.deleteMany({
+      listId: foreignId
     });
 
+    // Si todo fue exitoso, respondemos con un mensaje de éxito
     res.status(200).json({ message: 'Lista e historial eliminados' });
+
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ message: 'Error al eliminar' });
+    // Si ocurre algún error (ej. ID inválido, problema de conexión a DB, etc.)
+    console.error('Error al eliminar lista y historial:', error);
+    res.status(500).json({ message: 'Error interno del servidor al eliminar' });
   }
 };
 // Actualizar una lista de la compra por su ID

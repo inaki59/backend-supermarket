@@ -23,7 +23,7 @@ const ProductEntrySchema = new Schema<ProductEntry>({
 
 // Creamos el esquema para el historial de compras
 const PurchaseHistorySchema = new Schema<PurchaseHistoryDocument>({
-  listId: { type: Schema.Types.ObjectId, ref: 'ShoppingList', required: true },  
+  listId: { type: Schema.Types.ObjectId, ref: 'ShoppingLists', required: true },  
   listName: { type: String, required: true },
   users: [{ type: Schema.Types.ObjectId, ref: 'User', required: true }],  
   products: { type: [ProductEntrySchema], required: true },
@@ -32,4 +32,4 @@ const PurchaseHistorySchema = new Schema<PurchaseHistoryDocument>({
 
 const PurchaseHistoryModel = model<PurchaseHistoryDocument>('PurchaseHistory', PurchaseHistorySchema);
 
-export { PurchaseHistoryModel, PurchaseHistoryDocument };
+export default  PurchaseHistoryModel
