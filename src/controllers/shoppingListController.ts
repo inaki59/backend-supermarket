@@ -155,17 +155,17 @@ export const getShoppingListById = async (req: Request, res: Response): Promise<
 // Eliminar una lista de la compra por su ID
 export const deleteShoppingList = async (req: Request, res: Response): Promise<any> => {
   try {
-    const listId = new Types.ObjectId(req.params.id); // Conversión clave
+    const foreignId = new Types.ObjectId(req.params.id); // Conversión clave
 
     // 1. Eliminar lista
-    const shoppingList = await ShoppingListModel.findByIdAndDelete(listId);
+    const shoppingList = await ShoppingListModel.findByIdAndDelete(foreignId);
     if (!shoppingList) {
       return res.status(404).json({ message: 'Lista no encontrada' });
     }
 
     // 2. Eliminar historiales (ahora comparando ObjectId con String)
     await PurchaseHistoryModel.deleteMany({ 
-      listId: req.params.id // Mantenemos como string para coincidir con el modelo
+      listId: foreignId // Mantenemos como string para coincidir con el modelo
     });
 
     res.status(200).json({ message: 'Lista e historial eliminados' });
