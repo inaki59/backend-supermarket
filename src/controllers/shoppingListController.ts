@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { generateCodelist } from '../utils/generateCodeList';
 import ProductModel from '../models/ProductModel';
 import { PurchaseHistoryModel } from '../models/PurcharseHostoryDocument';
+import { Types } from 'mongoose';
 
 const secretKey = process.env.SECRET_KEY as string; 
 interface JwtPayload {
@@ -152,23 +153,27 @@ export const getShoppingListById = async (req: Request, res: Response): Promise<
 };
 
 // Eliminar una lista de la compra por su ID
-export const deleteShoppingList = async (req: Request, res: Response):Promise<any> => {
+export const deleteShoppingList = async (req: Request, res: Response): Promise<any> => {
   try {
-    const shoppingList = await ShoppingListModel.findByIdAndDelete(req.params.id);
+    const listId = new Types.ObjectId(req.params.id); // Conversión clave
+
+    // 1. Eliminar lista
+    const shoppingList = await ShoppingListModel.findByIdAndDelete(listId);
     if (!shoppingList) {
-      return res.status(404).json({ message: 'Lista de compra no encontrada' });
+      return res.status(404).json({ message: 'Lista no encontrada' });
     }
 
     // 2. Eliminar historiales (ahora comparando ObjectId con String)
     await PurchaseHistoryModel.deleteMany({ 
       listId: req.params.id // Mantenemos como string para coincidir con el modelo
     });
-    res.status(200).json({ message: 'Lista de compra eliminada correctamente' });
+
+    res.status(200).json({ message: 'Lista e historial eliminados' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al eliminar la lista de compra' });
+    console.error('Error:', error);
+    res.status(500).json({ message: 'Error al eliminar' });
   }
-}
+};
 // Actualizar una lista de la compra por su ID
 export const updateShoppingList = async (req: Request, res: Response):Promise<any> => {
   try {
