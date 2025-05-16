@@ -63,7 +63,9 @@ export const leaveShoppingList = async (req: Request, res: Response): Promise<an
     const userId = decoded.id;
   
     const { code } = req.body;
-
+     if (!code || typeof code !== 'string' || code.trim() === '') {
+        return res.status(400).json({ error: 'El código es obligatorio y debe ser una cadena no vacía.' });
+    }
    
     const updatedList = await ShoppingListModel.findOneAndUpdate(
       { code },
