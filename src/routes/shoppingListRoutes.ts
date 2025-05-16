@@ -13,8 +13,8 @@ import { checkgroupAccess, checkUserInShoppingList, validateCode, validateShoppi
 export const routerList = Router();
 
 // Rutas para listas de compra
+routerList.post('/group/leave',[verifyToken,checkgroupAccess],leaveShoppingList);
 routerList.post('/', [verifyToken], createShoppingList);  
-routerList.post('/group-leave',[verifyToken,checkgroupAccess],leaveShoppingList);
 routerList.post('/group',[verifyToken,validateCode,checkgroupAccess],joinShoppingList);
 routerList.post("/add-product/:id",[verifyToken,checkUserInShoppingList,validateShoppingListProducts],addProductsToShoppingList);                   
 routerList.get('/group/:id', getShoppingLists);                           
