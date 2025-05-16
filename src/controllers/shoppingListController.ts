@@ -58,31 +58,41 @@ export const joinShoppingList = async (req: Request, res: Response): Promise<any
 };
 export const leaveShoppingList = async (req: Request, res: Response): Promise<any> => {
   try {
-    const token = req.header("Authorization") || "";
+    const token = req.header("Authorization")?.replace('Bearer ', '') || "";
     const decoded = jwt.verify(token, secretKey) as JwtPayload;
     const userId = decoded.id;
   
     const { code } = req.body;
 
-    const shoppingList = await ShoppingListModel.findOne({ code });
-    if (!shoppingList) {
+   
+    const updatedList = await ShoppingListModel.findOneAndUpdate(
+      { code },
+      { $pull: { userIds: userId } },
+      { new: true }
+    );
+
+    if (!updatedList) {
       return res.status(404).json({ message: 'Lista de compra no encontrada' });
     }
 
-    // Verificar si el usuario está en la lista
-    const userIndex = shoppingList.userIds.indexOf(userId);
-    if (userIndex === -1) {
-      return res.status(400).json({ message: 'El usuario no está en esta lista' });
+    // Verificar si el usuario estaba realmente en la lista
+    if (updatedList.userIds.includes(userId)) {
+      return res.status(400).json({ 
+        message: 'El usuario no fue removido correctamente',
+        shoppingList: updatedList
+      });
     }
 
-    // Remover al usuario de la lista
-    shoppingList.userIds.splice(userIndex, 1);
-    await shoppingList.save();
-
-    return res.status(200).json({ message: 'Usuario removido de la lista', shoppingList });
+    return res.status(200).json({ 
+      message: 'Usuario removido de la lista exitosamente', 
+      shoppingList: updatedList 
+    });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error al abandonar la lista de compras' });
+    console.error('Error en leaveShoppingList:', error);
+    return res.status(500).json({ 
+      message: 'Error al abandonar la lista de compras',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
   }
 };
 
