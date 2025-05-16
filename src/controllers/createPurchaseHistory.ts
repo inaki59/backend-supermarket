@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PurchaseHistoryModel } from '../models/PurcharseHostoryDocument';
+import  PurchaseHistoryModel  from '../models/PurcharseHostoryDocument';
 
 // Crear un historial de compra
 export const createPurchaseHistory = async (req: Request, res: Response) => {

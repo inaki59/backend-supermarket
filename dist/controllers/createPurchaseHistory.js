@@ -8,14 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletePurchaseHistory = exports.updatePurchaseHistory = exports.getPurchaseHistoryById = exports.getAllPurchaseHistories = exports.createPurchaseHistory = void 0;
-const PurcharseHostoryDocument_1 = require("../models/PurcharseHostoryDocument");
+const PurcharseHostoryDocument_1 = __importDefault(require("../models/PurcharseHostoryDocument"));
 // Crear un historial de compra
 const createPurchaseHistory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { listId, listName, users, products, purchasedAt } = req.body;
-        const newHistory = new PurcharseHostoryDocument_1.PurchaseHistoryModel({
+        const newHistory = new PurcharseHostoryDocument_1.default({
             listId,
             listName,
             users,
@@ -33,7 +36,7 @@ exports.createPurchaseHistory = createPurchaseHistory;
 // Obtener todos los historiales
 const getAllPurchaseHistories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const histories = yield PurcharseHostoryDocument_1.PurchaseHistoryModel.find();
+        const histories = yield PurcharseHostoryDocument_1.default.find();
         res.status(200).json(histories);
     }
     catch (error) {
@@ -45,7 +48,7 @@ exports.getAllPurchaseHistories = getAllPurchaseHistories;
 const getPurchaseHistoryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const history = yield PurcharseHostoryDocument_1.PurchaseHistoryModel.findById(id);
+        const history = yield PurcharseHostoryDocument_1.default.findById(id);
         if (!history) {
             return res.status(404).json({ error: 'Historial no encontrado' });
         }
@@ -61,7 +64,7 @@ const updatePurchaseHistory = (req, res) => __awaiter(void 0, void 0, void 0, fu
     try {
         const { id } = req.params;
         const updatedData = req.body;
-        const updatedHistory = yield PurcharseHostoryDocument_1.PurchaseHistoryModel.findByIdAndUpdate(id, updatedData, { new: true });
+        const updatedHistory = yield PurcharseHostoryDocument_1.default.findByIdAndUpdate(id, updatedData, { new: true });
         if (!updatedHistory) {
             return res.status(404).json({ error: 'Historial no encontrado' });
         }
@@ -76,7 +79,7 @@ exports.updatePurchaseHistory = updatePurchaseHistory;
 const deletePurchaseHistory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const deletedHistory = yield PurcharseHostoryDocument_1.PurchaseHistoryModel.findByIdAndDelete(id);
+        const deletedHistory = yield PurcharseHostoryDocument_1.default.findByIdAndDelete(id);
         if (!deletedHistory) {
             return res.status(404).json({ error: 'Historial no encontrado' });
         }

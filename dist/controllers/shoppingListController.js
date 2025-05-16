@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMobilePurchaseHistory = exports.clearProductsFromShoppingList = exports.getShoppingLists = exports.updateProductInShoppingList = exports.updateShoppingList = exports.deleteShoppingList = exports.getShoppingListById = exports.removeProductFromShoppingList = exports.addProductsToShoppingList = exports.joinShoppingList = exports.createShoppingList = void 0;
+exports.getMobilePurchaseHistory = exports.clearProductsFromShoppingList = exports.getShoppingLists = exports.updateProductInShoppingList = exports.updateShoppingList = exports.deleteShoppingList = exports.getShoppingListById = exports.removeProductFromShoppingList = exports.addProductsToShoppingList = exports.leaveShoppingList = exports.joinShoppingList = exports.createShoppingList = void 0;
 const ShoppingListModel_1 = __importDefault(require("../models/ShoppingListModel"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const generateCodeList_1 = require("../utils/generateCodeList");
-const PurcharseHostoryDocument_1 = require("../models/PurcharseHostoryDocument");
+const PurcharseHostoryDocument_1 = __importDefault(require("../models/PurcharseHostoryDocument"));
+const mongoose_1 = require("mongoose");
 const secretKey = process.env.SECRET_KEY;
 const createShoppingList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -55,6 +56,40 @@ const joinShoppingList = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.joinShoppingList = joinShoppingList;
+const leaveShoppingList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const token = req.header("Authorization") || "";
+        const decoded = jsonwebtoken_1.default.verify(token, secretKey);
+        const userId = decoded.id;
+        const { code } = req.body;
+        if (!code || typeof code !== 'string' || code.trim() === '') {
+            return res.status(400).json({ error: 'El código es obligatorio y debe ser una cadena no vacía.' });
+        }
+        const updatedList = yield ShoppingListModel_1.default.findOneAndUpdate({ code }, { $pull: { userIds: userId } }, { new: true });
+        if (!updatedList) {
+            return res.status(404).json({ message: 'Lista de compra no encontrada' });
+        }
+        // Verificar si el usuario estaba realmente en la lista
+        if (updatedList.userIds.includes(userId)) {
+            return res.status(400).json({
+                message: 'El usuario no fue removido correctamente',
+                shoppingList: updatedList
+            });
+        }
+        return res.status(200).json({
+            message: 'Usuario removido de la lista exitosamente',
+            shoppingList: updatedList
+        });
+    }
+    catch (error) {
+        console.error('Error en leaveShoppingList:', error);
+        return res.status(500).json({
+            message: 'Error al abandonar la lista de compras',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+});
+exports.leaveShoppingList = leaveShoppingList;
 const addProductsToShoppingList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { products } = req.body;
@@ -142,15 +177,28 @@ exports.getShoppingListById = getShoppingListById;
 // Eliminar una lista de la compra por su ID
 const deleteShoppingList = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const shoppingList = yield ShoppingListModel_1.default.findByIdAndDelete(req.params.id);
+        // 1. Convertir el ID del parámetro a un ObjectId.
+        // ESTO ES CORRECTO porque tanto el _id de ShoppingList como el listId esperado en PurchaseHistory son ObjectId.
+        const foreignId = new mongoose_1.Types.ObjectId(req.params.id);
+        // 2. Eliminar la lista de compras por su ID (ObjectId).
+        const shoppingList = yield ShoppingListModel_1.default.findByIdAndDelete(foreignId);
+        // Si la lista no se encuentra, respondemos con 404
         if (!shoppingList) {
-            return res.status(404).json({ message: 'Lista de compra no encontrada' });
+            return res.status(404).json({ message: 'Lista no encontrada' });
         }
-        res.status(200).json({ message: 'Lista de compra eliminada correctamente' });
+        // 3. Eliminar todos los historiales de compra asociados a esta lista.
+        // Aquí buscamos documentos donde el campo 'listId' (que DEBE ser ObjectId según tu esquema)
+        // coincida con el 'foreignId' (que es el ObjectId de la lista eliminada).
+        yield PurcharseHostoryDocument_1.default.deleteMany({
+            listId: foreignId
+        });
+        // Si todo fue exitoso, respondemos con un mensaje de éxito
+        res.status(200).json({ message: 'Lista e historial eliminados' });
     }
     catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al eliminar la lista de compra' });
+        // Si ocurre algún error (ej. ID inválido, problema de conexión a DB, etc.)
+        console.error('Error al eliminar lista y historial:', error);
+        res.status(500).json({ message: 'Error interno del servidor al eliminar' });
     }
 });
 exports.deleteShoppingList = deleteShoppingList;
@@ -224,7 +272,7 @@ const clearProductsFromShoppingList = (req, res) => __awaiter(void 0, void 0, vo
             return res.status(404).json({ message: 'Lista de compras no encontrada.' });
         }
         // Crear registro en el historial de compras antes de limpiar
-        const purchaseHistoryEntry = new PurcharseHostoryDocument_1.PurchaseHistoryModel({
+        const purchaseHistoryEntry = new PurcharseHostoryDocument_1.default({
             listId: shoppingList._id,
             listName: shoppingList.name,
             users: shoppingList.userIds,
@@ -260,7 +308,7 @@ const getMobilePurchaseHistory = (req, res) => __awaiter(void 0, void 0, void 0,
         const listId = req.params.listId;
         // Validación rápida de ID
         // Consulta optimizada para móvil
-        const histories = yield PurcharseHostoryDocument_1.PurchaseHistoryModel.find({ listId })
+        const histories = yield PurcharseHostoryDocument_1.default.find({ listId })
             .select('_id purchasedAt products.productId products.note') // Proyección estilo Mongoose
             .populate({
             path: 'products.productId',
