@@ -56,6 +56,35 @@ export const joinShoppingList = async (req: Request, res: Response): Promise<any
     return res.status(500).json({ message: 'Error al unirse a la lista de compras' });
   }
 };
+export const leaveShoppingList = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const token = req.header("Authorization") || "";
+    const decoded = jwt.verify(token, secretKey) as JwtPayload;
+    const userId = decoded.id;
+  
+    const { code } = req.body;
+
+    const shoppingList = await ShoppingListModel.findOne({ code });
+    if (!shoppingList) {
+      return res.status(404).json({ message: 'Lista de compra no encontrada' });
+    }
+
+    // Verificar si el usuario está en la lista
+    const userIndex = shoppingList.userIds.indexOf(userId);
+    if (userIndex === -1) {
+      return res.status(400).json({ message: 'El usuario no está en esta lista' });
+    }
+
+    // Remover al usuario de la lista
+    shoppingList.userIds.splice(userIndex, 1);
+    await shoppingList.save();
+
+    return res.status(200).json({ message: 'Usuario removido de la lista', shoppingList });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error al abandonar la lista de compras' });
+  }
+};
 
 export const addProductsToShoppingList = async (req: Request, res: Response): Promise<any> => {
   try {
