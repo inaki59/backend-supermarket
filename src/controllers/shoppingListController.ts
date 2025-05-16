@@ -58,7 +58,7 @@ export const joinShoppingList = async (req: Request, res: Response): Promise<any
 };
 export const leaveShoppingList = async (req: Request, res: Response): Promise<any> => {
   try {
-    const token = req.header("Authorization")?.replace('Bearer ', '') || "";
+     const token = req.header("Authorization") || "";
     const decoded = jwt.verify(token, secretKey) as JwtPayload;
     const userId = decoded.id;
   
